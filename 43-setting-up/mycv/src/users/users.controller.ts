@@ -12,7 +12,10 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
+import { UserDto } from './dtos/user.dto';
 import { UsersService } from './users.service';
+import {Serialize} from '../interceptors/serialize.interceptor'
+
 
 @Controller('auth')
 export class UsersController {
@@ -29,6 +32,10 @@ export class UsersController {
   }
 
 //   @UseInterceptors(ClassSerializerInterceptor) // this is for object to plane json
+  // @UseInterceptors(SerializeInterceptor) 
+  // @UseInterceptors(new SerializeInterceptor(UserDto)) 
+
+  @Serialize(UserDto)
   @Get('/:id')
   findUser(@Param('id') id: string) {
     console.log(id);
