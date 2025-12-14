@@ -42,6 +42,17 @@ export class UsersController {
     return user;
   }
 
+  @Get("/isLoggedin")
+  async isLoggedIn(@Session() session:any){
+      return await this.userService.findOne(session.userId);   
+  }
+
+  @Post("/loggedout")
+  async loggedout(@Session() session:any){
+      session.userId=null;
+      return "logged out" ;   
+  }
+
   //   @UseInterceptors(ClassSerializerInterceptor)
   @Get('/alluser')
   findAllUser(@Query('email') email: string) {
