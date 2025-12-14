@@ -8,34 +8,53 @@ import {
   Delete,
   Get,
   UseInterceptors,
-//   ClassSerializerInterceptor,
+  Session
+  //   ClassSerializerInterceptor,
 } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { UserDto } from './dtos/user.dto';
 import { UsersService } from './users.service';
-import {Serialize} from '../interceptors/serialize.interceptor'
+import { Serialize } from '../interceptors/serialize.interceptor';
+import { AuthService } from './auth.service';
 
-
+@Serialize(UserDto)
 @Controller('auth')
 export class UsersController {
-  constructor(private userService: UsersService) {}
+  constructor(
+    private userService: UsersService,
+    private authService: AuthService,
+  ) {}
   @Post('/signup')
-  createUser(@Body() body: CreateUserDto) {
-    return this.userService.createUser(body.email, body.password);
+  async createUser(@Body() body: CreateUserDto,@Session() session:any) {
+    // return this.authService.signup(body.email, body.password);
+    const user=await this.authService.signup(body.email, body.password);
+    session.userId= user.id;
+    return user;
+    // return this.userService.createUser(body.email, body.password);
   }
 
-//   @UseInterceptors(ClassSerializerInterceptor)
+  @Get('/login')
+  async signin(@Body() body:CreateUserDto,@Session() session:any) {
+    // return this.authService.signin(body.email,body.password);
+    const user= await this.authService.signin(body.email,body.password);
+    session.userId=user.id;
+    return user;
+  }
+
+  //   @UseInterceptors(ClassSerializerInterceptor)
   @Get('/alluser')
   findAllUser(@Query('email') email: string) {
+    // session
     return this.userService.find(email);
   }
 
-//   @UseInterceptors(ClassSerializerInterceptor) // this is for object to plane json
-  // @UseInterceptors(SerializeInterceptor) 
-  // @UseInterceptors(new SerializeInterceptor(UserDto)) 
 
-  @Serialize(UserDto)
+  //   @UseInterceptors(ClassSerializerInterceptor) // this is for object to plane json
+  // @UseInterceptors(SerializeInterceptor)
+  // @UseInterceptors(new SerializeInterceptor(UserDto))
+
+  // @Serialize(UserDto)
   @Get('/:id')
   findUser(@Param('id') id: string) {
     console.log(id);
